@@ -2,13 +2,18 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const path = require('path');
-const server = app.listen(3000, function(){
-  console.log("Listening on port %s...", server.address().port)
+
+
+if (process.env.NODE_ENV === 'test'){
+  app.EXPRESS_APP = true;
+  module.exports = app;
+} else app.listen(3000, () => {
+    console.log('http://localhost:3000')
 });
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.get('/', (request, response) => {
+app.get('/', (request, response, next) => {
   response.send('This is working so far')
 })
 
@@ -21,8 +26,10 @@ app.get('/form-post', (request, response, next) => {
 })
 
 app.get('/submit-form', (request, response, next) => {
-  let submittedData = request.body;
-  response.json(submittedData);
+  response.json({
+    'body-params': request.body,
+    'query-params': request.query
+  })
 })
 
 app.post('/submit-form', (request, response, next) => {
